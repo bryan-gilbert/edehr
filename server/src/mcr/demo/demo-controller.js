@@ -41,28 +41,28 @@ export default class DemoController {
     this.config = config
   }
 
-  setSharedControllers(cc) {
+  setSharedControllers (cc) {
     this.comCon = cc
   }
 
-  addSample(theSeed, assignmentData, toolC) {
-  Promise.resolve().then(() => {
+  addSample (theSeed, assignmentData, toolC) {
+    Promise.resolve().then(() => {
       const data = theSeed
       if (debugDC) debug('DemoController create', data.name)
-      const aSeed = Object.assign({}, seedTemplate, { toolConsumer: toolC._id })
+      const aSeed = Object.assign({}, seedTemplate, {toolConsumer: toolC._id})
       aSeed.name = data.name
       aSeed.description = data.description
       aSeed.ehrData = data.ehrData
       return this.comCon.seedController.create(aSeed)
     })
-    .then((seed) => {
-      if (debugDC) debug('DemoController create assignment')
-      const ass = Object.assign({}, assignmentData, { toolConsumer: toolC })
-      return this.comCon.assignmentController.createAssignment(ass, seed._id)
-    })
+      .then((seed) => {
+        if (debugDC) debug('DemoController create assignment')
+        const ass = Object.assign({}, assignmentData, {toolConsumer: toolC})
+        return this.comCon.assignmentController.createAssignment(ass, seed._id)
+      })
   }
 
-_createDemoToolConsumer (req, res, next) {
+  _createDemoToolConsumer (req, res, next) {
     let theId = req.body.id
     if (debugDC) debug('DemoController create tool. Call provided this id:', theId)
     if (!theId) {
@@ -72,7 +72,7 @@ _createDemoToolConsumer (req, res, next) {
     }
     theId = 'Demo-' + Date.now() + '-' + theId
     if (debugDC) debug('DemoController create tool. Create tool with this id:', theId)
-    const consumerDef = Object.assign({}, consumerBaseDef, {  oauth_consumer_key: theId, oauth_consumer_secret: theId })
+    const consumerDef = Object.assign({}, consumerBaseDef, {oauth_consumer_key: theId, oauth_consumer_secret: theId})
     let toolC
     this.comCon.consumerController.createToolConsumer(consumerDef)
       .then((toolConsumer) => {
@@ -86,7 +86,7 @@ _createDemoToolConsumer (req, res, next) {
         return this.addSample(ej2Seed, assignment2, toolC)
       })
       .then(() => {
-        return this.addSample(wound1Seed, wound1  , toolC)
+        return this.addSample(wound1Seed, wound1, toolC)
       })
       .then(() => {
         if (debugDC) debug('DemoController generate token')
@@ -105,7 +105,6 @@ _createDemoToolConsumer (req, res, next) {
         }
       })
   }
-
 
   deleteDemoData (consumerKey) {
     let toolConsumer
@@ -185,7 +184,7 @@ _createDemoToolConsumer (req, res, next) {
         'Content-Type': 'application/json;charset=utf-8',
         host: host,
       },
-      body: Object.assign({}, ltiData, { demoRedirect: true})
+      body: Object.assign({}, ltiData, {demoRedirect: true})
     }
     const debugSignature = false
     let withDetailsCallback = debugSignature ?
@@ -228,11 +227,11 @@ _createDemoToolConsumer (req, res, next) {
     router.post('/logout', validatorMiddleware, (req, res) => {
       if (debugDC) debug('DemoController logout', req.authPayload)
       this.deleteDemoData(req.authPayload.demoData.toolConsumerKey)
-        .then( () => {
+        .then(() => {
           if (debugDC) debug('DemoController logout, return 200')
           res.status(200).send('success')
         })
-        .catch( (err) => {
+        .catch((err) => {
           debug('DemoController logout ERROR ', err)
           res.status(500).send(err)
         })
