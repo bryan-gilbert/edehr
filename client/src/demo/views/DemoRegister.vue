@@ -18,7 +18,9 @@
         div You are already logged into the demonstration. &nbsp;
           ui-link(:name="'demoLms'") Click here to return to the demonstration page.
       div(v-if="!isDemo")
-        demo-email-form(v-on:request-sent="nextStep($event)")
+        demo-email-form(v-if="isPendingUserEmail", v-on:email-sent="authUser($event)")
+        div(class="mb-2", v-if="email") Email sent to: {{ email }}
+        demo-v-code-form(v-if="isPendingVerificationCode", v-on:vcode-sent="verifyUser($event)", v-on:cancel="cancelDemo()")
 
 </template>
 
@@ -26,58 +28,64 @@
 import StoreHelper from '@/helpers/store-helper'
 import UiButton from '@/app/ui/UiButton'
 import DemoHelper from '@/demo/demo-helper'
-import DemoEmailForm from '@/demo/DemoEmailForm.vue'
+import DemoEmailForm from '@/demo/DemoFormEmail.vue'
+import DemoVCodeForm from '@/demo/DemoFormVCode.vue'
 import UiLink from '@/app/ui/UiLink.vue'
 import { demoText } from '@/demo/demoText'
 /*
-        // set action to void action to prevent form submit - using a form to validate email
-        form(action="javascript:void(0);")
-          div(class="columns")
-            div To enter the demo mode please provide your email address. Press next and then go to your email and look for a verification code from <strong>no-reply@npuser.org'</strong>.
-          div(class="columns")
-            div(class="column is-4")
-              label(for="email") Enter your email address
-            div(class="column is-4")
-              input(type="email", v-model="email", id="email", name="email", required)
-          div(class="columns")
-            ui-button(v-on:buttonClicked="createDemo", title="Register") Register {{ email }} createDemo
-          div(class="columns")
-            div
-              p The EdEHR is a prototype web application.
-              p Any data that you enter while using this demonstration mode may be lost if the application is significantly changed.  If you use the demonstration mode to create any course content then please download your work regularly.
-          div(class="columns")
-            div(class="column is-4")
-            div(class="column is-4")
-              input(type="checkbox", v-model="consent", id="consent", name="consent", required)
-              label(for="consent") I understand
+p The EdEHR is a prototype web application.
+p
+input(type="checkbox", v-model="consent", id="consent", name="consent", required)
+label(for="consent") I understand
 
  */
 export default {
   components: {
-    DemoEmailForm,
+    DemoEmailForm, DemoVCodeForm,
     UiButton, UiLink
   },
   data () {
     return {
+      // text
+      demoText: demoText,
+      // user inputs
       email: '',
       consent: false,
-      demoText: demoText
+      vcode: '',
+      // logic control
+      isPendingUserEmail: true,
+      isPendingVerificationCode: false,
     }
   },
   computed: {
     isDemo () { return StoreHelper.isDemoMode()  },
     isStudent () { return StoreHelper.isStudent() },
     isInstructor () { return StoreHelper.isInstructor() },
-    isFormValid () {
-      return Object.keys(this.persona).length > 0
-    }
   },
   methods: {
-    nextStep(email) {
-      console.log('next step with email', email)
+    cancelDemo () {
+      this.email = ''
+      this.vcode = ''
+      this.consent = false
+      this.isPendingUserEmail = true
+      this.isPendingVerificationCode = false
+    },
+    async authUser (email) {
+      console.log('authUser with email', email)
+      await StoreHelper.submitDemoUserEmail(email)
+      this.email = email
+      this.isPendingUserEmail = false
+      this.isPendingVerificationCode = true
+    },
+    async verifyUser (vcode) {
+      console.log('user provided vcode and consented too', vcode)
+      this.vcode = vcode
+      this.isPendingVerificationCode = false
+      this.createDemo()
     },
     async logoutUser () {
       await StoreHelper.logUserOutOfEdEHR()
+      this.cancelDemo()
       // refresh this page
       this.$router.go(0)
     },
@@ -85,12 +93,11 @@ export default {
       this.$router.push({ name: 'demoRegister' })
     },
     createDemo () {
-      console.log('createDemo')
       const demoHelper = new DemoHelper()
       demoHelper.proceedDemoToolConsumerCreation()
         .then( () => {
           console.log('go to lms')
-          // this.$router.push('demoLms')
+          this.$router.push('demoLms')
         })
     }
   },
