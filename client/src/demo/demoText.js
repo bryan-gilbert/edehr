@@ -26,5 +26,8 @@ export const demoText = {
   logout: {
     title: 'Confirm leave the EdEHR demonstration mode',
     body: 'Exit the demonstration mode. At this time this means all your data is removed. But do not worry because you can just come back and try out the EdEHR again. '
-  }
+  },
+  emailLabel: 'Enter your email address',
+  emailButtonLabel: 'Register',
+  emailPrompt: 'To enter the demo mode please provide your email address. Press next and then go to your email and look for a verification code from <strong>no-reply@npuser.org\'</strong>.'
 }

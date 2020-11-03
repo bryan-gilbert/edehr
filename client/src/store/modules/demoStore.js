@@ -1,4 +1,4 @@
-import DemoStoreHelper from '@/helpers/demo-store-helper'
+import DemoStoreHelper from '@/demo/demo-store-helper'
 import StoreHelper from '../../helpers/store-helper'
 import sKeys from '../../helpers/session-keys'
 

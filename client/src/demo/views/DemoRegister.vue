@@ -14,39 +14,53 @@
           ui-link(:name="'ehr'") Go to your assignment.
         div(class="column is-2")
           ui-button(@buttonClicked="logoutUser") Sign out as student
-      div(v-if="isDemo") isDemo {{isDemo}}
+      div(v-if="isDemo")
         div You are already logged into the demonstration. &nbsp;
           ui-link(:name="'demoLms'") Click here to return to the demonstration page.
       div(v-if="!isDemo")
-        form
-          div(class="ehr-group-wrapper")
-            div
-              p The EdEHR is a prototype web application.
-              p Any data that you enter while using this demonstration mode may be lost if the application is significantly changed.  If you use the demonstration mode to create any course content then please download your work regularly.
-              p To enter the demo mode please provide your email address. Press next and then go to your email and look for a verification code from <strong>no-reply@npuser.org'</strong>.
-          div(class="ehr-group-wrapper")
-            div(class="text_input_wrapper")
-              label(for="email") Enter your email address
-              input(type="email", v-model="email", id="email", name="email", required)
-          ui-button(v-on:buttonClicked="proceedDemoToolConsumerCreation", title="Register") Register
+        demo-email-form(v-on:request-sent="nextStep($event)")
 
 </template>
 
 <script>
 import StoreHelper from '@/helpers/store-helper'
 import UiButton from '@/app/ui/UiButton'
-import DemoAccess from '@/demo/DemoAccess.vue'
+import DemoHelper from '@/demo/demo-helper'
+import DemoEmailForm from '@/demo/DemoEmailForm.vue'
 import UiLink from '@/app/ui/UiLink.vue'
 import { demoText } from '@/demo/demoText'
+/*
+        // set action to void action to prevent form submit - using a form to validate email
+        form(action="javascript:void(0);")
+          div(class="columns")
+            div To enter the demo mode please provide your email address. Press next and then go to your email and look for a verification code from <strong>no-reply@npuser.org'</strong>.
+          div(class="columns")
+            div(class="column is-4")
+              label(for="email") Enter your email address
+            div(class="column is-4")
+              input(type="email", v-model="email", id="email", name="email", required)
+          div(class="columns")
+            ui-button(v-on:buttonClicked="createDemo", title="Register") Register {{ email }} createDemo
+          div(class="columns")
+            div
+              p The EdEHR is a prototype web application.
+              p Any data that you enter while using this demonstration mode may be lost if the application is significantly changed.  If you use the demonstration mode to create any course content then please download your work regularly.
+          div(class="columns")
+            div(class="column is-4")
+            div(class="column is-4")
+              input(type="checkbox", v-model="consent", id="consent", name="consent", required)
+              label(for="consent") I understand
 
+ */
 export default {
   components: {
-    DemoAccess,
+    DemoEmailForm,
     UiButton, UiLink
   },
   data () {
     return {
-      persona: '',
+      email: '',
+      consent: false,
       demoText: demoText
     }
   },
@@ -59,6 +73,9 @@ export default {
     }
   },
   methods: {
+    nextStep(email) {
+      console.log('next step with email', email)
+    },
     async logoutUser () {
       await StoreHelper.logUserOutOfEdEHR()
       // refresh this page
@@ -67,11 +84,13 @@ export default {
     gotoDemoRegister () {
       this.$router.push({ name: 'demoRegister' })
     },
-    proceedDemoToolConsumerCreation () {
+    createDemo () {
+      console.log('createDemo')
       const demoHelper = new DemoHelper()
       demoHelper.proceedDemoToolConsumerCreation()
         .then( () => {
-          this.$router.push('demoLms')
+          console.log('go to lms')
+          // this.$router.push('demoLms')
         })
     }
   },

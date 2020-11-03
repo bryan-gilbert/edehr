@@ -26,7 +26,7 @@
 
 <script>
 import StoreHelper from '@/helpers/store-helper'
-import DemoHelper from '@/helpers/demo-helper'
+import DemoHelper from '@/demo/demo-helper'
 import UiButton from '@/app/ui/UiButton'
 import UiLink from '@/app/ui/UiLink.vue'
 import EventBus from '@/helpers/event-bus'
