@@ -31,7 +31,7 @@ import UiButton from '@/app/ui/UiButton'
 import UiLink from '@/app/ui/UiLink.vue'
 import EventBus from '@/helpers/event-bus'
 import { PAGE_DATA_READY_EVENT } from '@/helpers/event-bus'
-import { demoText } from '@/appText'
+import { demoText } from '@/demo/demoText'
 
 const debugDC = false
 
