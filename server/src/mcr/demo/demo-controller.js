@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import NoPasswordAuthorizer from 'npuser-client'
 import axios from 'axios'
 import qs from 'qs'
 import { demoPersonae } from '../../helpers/demo-personae'
@@ -39,6 +40,31 @@ export default class DemoController {
 
   constructor (config) {
     this.config = config
+  }
+
+  getNpUser ( ) {
+    if (!this.npuser) {
+      const {config} = this
+      const dev = config.NPUSER_DEV || 'true'
+      const cfg = {
+        baseUrl: config.NPUSER_URL || 'https://npuser.org',
+        clientId: config.NPUSER_CLIENT_ID || 'client1',
+        sharedSecretKey: config.NPUSER_SECRET || 'secret1',
+        silent: false,
+        dev: dev === 'true'
+      }
+      console.log('Create NP User Authorizer with ', cfg)
+      this.npuser = new NoPasswordAuthorizer(cfg)
+    }
+    return this.npuser
+  }
+
+  async submitUserAuth (req, res) {
+    const { email } = req.body
+    console.log('Authorize user based on this email address:', email)
+    const authResponse = await this.getNpUser().sendAuth(email)
+    console.log('Auth response:', authResponse)
+    res.status(200).json({result: authResponse})
   }
 
   setSharedControllers (cc) {
@@ -212,6 +238,12 @@ export default class DemoController {
       demoLimiter,
       (req, res, next) => {
         this._createDemoToolConsumer(req, res, next)
+      })
+
+    router.post('/submitEmail',
+      demoLimiter,
+      (req, res, next) => {
+        this.submitUserAuth(req, res, next)
       })
 
     /**
